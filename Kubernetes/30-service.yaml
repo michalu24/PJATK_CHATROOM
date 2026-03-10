@@ -1,16 +1,16 @@
 apiVersion: v1
-kind: # jaki rodzaj ?
+kind: Service
 metadata:
-  name: # name ?
+  name: chat-app
   namespace: app
   labels:
-    app: # name ?
+    app: chat-app
 spec:
-  type: # jaki rodzaj musi być aby serwis nadzorował obciążenie ?
+  type: LoadBalancer
   selector:
-    app: # name ?
+    app: chat-app
   ports:
     - name: http
-      port: # port ?
-      targetPort: # port kontenera ?
+      port: 80
+      targetPort: 8080
       protocol: TCP

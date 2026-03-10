@@ -29,6 +29,11 @@ public class MainController {
          * 5) Dodaj do modelu parę ("messages", messages).
          * 6) Zwróć nowy widok: new ModelAndView("index", model).
          */
-        throw new RuntimeException();
+        String loggedUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+        var model = new HashMap<String, Object>();
+        model.put("loggedUserName", loggedUserName);
+        var messages = messageService.lastForActiveUser(100, loggedUserName);
+        model.put("messages", messages);
+        return new ModelAndView("index", model);
     }
 }

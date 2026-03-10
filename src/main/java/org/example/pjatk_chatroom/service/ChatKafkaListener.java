@@ -1,10 +1,11 @@
 package org.example.pjatk_chatroom.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.example.pjatk_chatroom.domain.MessageDto;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -31,6 +32,7 @@ public class ChatKafkaListener {
          * 3) Wyślij tę wiadomość przez WebSocket na destination "/topic/greetings"
          *    używając ws.convertAndSend("/topic/greetings", msg)
          */
-        throw new RuntimeException();
+        messageService.addMessageWithNormalization(msg);
+        ws.convertAndSend("/topic/greetings", msg);
     }
 }

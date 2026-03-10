@@ -35,7 +35,29 @@ public class SecurityConfig {
          * 5) role: "USER"
          * 6) zwróć utworzony InMemoryUserDetailsManager
          */
-        throw new RuntimeException();
+        String generatedPassword = passwordEncoder.encode("test");
+        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+        manager.createUser(User.withUsername("Michal")
+                .password(generatedPassword)
+                .roles("USER")
+                .build());
+        manager.createUser(User.withUsername("Agnieszka")
+                .password(generatedPassword)
+                .roles("USER")
+                .build());
+        manager.createUser(User.withUsername("Krzysztof")
+                .password(generatedPassword)
+                .roles("USER")
+                .build());
+        manager.createUser(User.withUsername("Laura")
+                .password(generatedPassword)
+                .roles("USER")
+                .build());
+        manager.createUser(User.withUsername("Kate")
+                .password(generatedPassword)
+                .roles("USER")
+                .build());
+        return manager;
     }
 
     @Bean
@@ -44,7 +66,7 @@ public class SecurityConfig {
         /**
          * 1) Utwórz i zwróć new DefaultAuthenticationEventPublisher(delegate)
          */
-        throw new RuntimeException();
+        return new DefaultAuthenticationEventPublisher(delegate);
     }
 
     @Bean
@@ -58,6 +80,14 @@ public class SecurityConfig {
          * 6) ustaw loginPage("/login")
          * 7) zbuduj i zwróć SecurityFilterChain
          */
-        throw new RuntimeException();
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login").permitAll()
+                .requestMatchers("/images/image.png").permitAll()
+                .anyRequest().authenticated()
+        );
+        http.formLogin(form -> form
+                .loginPage("/login")
+        );
+        return http.build();
     }
 }

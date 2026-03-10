@@ -1,10 +1,14 @@
 package org.example.pjatk_chatroom.service;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
+
 import org.example.pjatk_chatroom.domain.Message;
 import org.example.pjatk_chatroom.domain.MessageDto;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 public class MessageService {
@@ -28,7 +32,17 @@ public class MessageService {
          * 8)   Dodaj nową wiadomość na koniec: history.addLast(new MessageDto(author, content)).
          * 9) Wyjdź z bloku synchronized.
          */
-        throw new RuntimeException();
+        if (message == null) return;
+        String author = message.author();
+        author = normalize(author);
+        String content = message.content();
+        content = safeTrim(content);
+        synchronized (history) {
+            if (history.size() >= MAX_HISTORY_SIZE) {
+                history.removeFirst();
+            }
+            history.addLast(new MessageDto(author, content));
+        }
     }
 
     public List<Message> lastForActiveUser(int limit, String currentUser) {
@@ -38,7 +52,13 @@ public class MessageService {
          * 3)   Zamień na widok: Message vm = toViewModel(m, currentUser).
          * 4) Zbierz wyniki do niezmienialnej listy i zwróć.
          */
-        throw new RuntimeException();
+        List<MessageDto> dtos = lastMessagesForLimit(limit);
+        List<Message> list = new ArrayList<>();
+        for (MessageDto m : dtos) {
+            Message vm = toViewModel(m, currentUser);
+            list.add(vm);
+        }
+        return List.copyOf(list);
     }
 
     private List<MessageDto> lastMessagesForLimit(int limit) {
@@ -53,7 +73,19 @@ public class MessageService {
          *    od indeksu (size - numberOfMessages) włącznie do indeksu 'size' wyłącznie.
          * 8) Zwróć listę z ostatnimi 'numberOfMessages' elementami.
          */
-        throw new RuntimeException();
+        synchronized (history) {
+            int size = history.size();
+            int numberOfMessages = Math.min(Math.max(ZERO, limit), size);
+            if (numberOfMessages == ZERO) {
+                return Collections.emptyList();
+            }
+            MessageDto[] snapshot = history.toArray(new MessageDto[size]);
+            List<MessageDto> result = new ArrayList<>(numberOfMessages);
+            for (int i = size - numberOfMessages; i < size; i++) {
+                result.add(snapshot[i]);
+            }
+            return result;
+        }
     }
 
     private Message toViewModel(MessageDto m, String currentUser) {
@@ -62,7 +94,8 @@ public class MessageService {
          * 2) Utwórz obiekt widoku: new Message(m.author(), m.content(), mine).
          * 3) Zwróć ten obiekt.
          */
-        throw new RuntimeException();
+        boolean mine = isMineMessage(m, currentUser);
+        return new Message(m.author(), m.content(), mine);
     }
 
     private static boolean isMineMessage(MessageDto m, String currentUser) {
@@ -71,7 +104,8 @@ public class MessageService {
          * 2) W przeciwnym razie porównaj bez rozróżniania wielkości liter:
          * 3)   zwróć m.author().equalsIgnoreCase(currentUser).
          */
-        throw new RuntimeException();
+        if (m.author() == null) return false;
+        return m.author().equalsIgnoreCase(currentUser);
     }
 
     private static String normalize(String s) {
@@ -80,7 +114,10 @@ public class MessageService {
          * 2)   jeśli NIE → zwróć stałą ANON.
          * 3)   jeśli TAK → zwróć s.trim().
          */
-        throw new RuntimeException();
+        if (s == null || s.trim().isEmpty()) {
+            return ANON;
+        }
+        return s.trim();
     }
 
     private static String safeTrim(String s) {
@@ -88,6 +125,9 @@ public class MessageService {
          * 1) Jeśli s == null → zwróć stałą EMPTY_STRING.
          * 2) W przeciwnym razie → zwróć s.trim().
          */
-        throw new RuntimeException();
+        if (s == null) {
+            return EMPTY_STRING;
+        }
+        return s.trim();
     }
 }
